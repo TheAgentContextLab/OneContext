@@ -1,5 +1,5 @@
 # OneContext
- OneContext gives your team a ***unified context for ALL AI Agents***. It turns your agent's work into sharable memory so anyone can pick up from the same context.
+ OneContext is an Agent Self-Managed Context layer, it gives your team a ***unified context for ALL AI Agents***, so anyone, any agent can pick up from the same context.
 
  ## Quick Install
  ```npm i -g onecontext-ai```
