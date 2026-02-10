@@ -16,7 +16,7 @@
  
  **Prerequisites**
  * Node.js >= 16
- * Python 3.8+ with one of: ```uv```, ```pipx```, ```pip3```, or ```pip```
+ * Python 3.11+ with one of: ```uv```, ```pipx```, ```pip3```, or ```pip```
 
 ## Quick Start
 Run: 
