@@ -1,0 +1,72 @@
+Fix for tmux 3.4+ compatibility in src/realign/dashboard/tmux_manager.py
+
+This patch addresses the "Failed to create terminal" / "size missing" error
+on systems running tmux >= 3.4 (commonly Ubuntu 24.04, WSL2, and other
+recent Linux distributions).
+
+Apply with: git apply patches/tmux-3.4-split-window-fix.patch
+
+--- a/src/realign/dashboard/tmux_manager.py
++++ b/src/realign/dashboard/tmux_manager.py
+@@ -509,14 +509,14 @@
+     has = _run_outer_tmux(["has-session", "-t", OUTER_SESSION], capture=True)
+     if has.returncode != 0:
+         created = _run_outer_tmux(
+-            ["new-session", "-d", "-s", OUTER_SESSION, "-n", OUTER_WINDOW],
++            ["new-session", "-d", "-x", "200", "-y", "50", "-s", OUTER_SESSION, "-n", OUTER_WINDOW],
+             capture=True,
+         )
+         if created.returncode != 0 and _cleanup_stale_tmux_socket(
+             (created.stderr or "") + "\n" + (has.stderr or "")
+         ):
+             created = _run_outer_tmux(
+-                ["new-session", "-d", "-s", OUTER_SESSION, "-n", OUTER_WINDOW],
++                ["new-session", "-d", "-x", "200", "-y", "50", "-s", OUTER_SESSION, "-n", OUTER_WINDOW],
+                 capture=True,
+             )
+         if created.returncode != 0:
+@@ -608,8 +608,8 @@
+             [
+                 "split-window",
+                 "-h",
+-                "-p",
+-                "50",
++                "-l",
++                "50%",
+                 "-t",
+                 pane_target,
+                 "-d",
+@@ -661,8 +661,6 @@
+         # cross-process resources (e.g. singleton locks) while tmux is attached.
+         proc = subprocess.run(
+             ["tmux", "-L", OUTER_SOCKET, "attach", "-t", OUTER_SESSION],
+-            text=True,
+-            capture_output=True,
+             check=False,
+         )
+         if int(proc.returncode) != 0:
+@@ -844,7 +842,7 @@
+         return False
+
+     panes_out = (
+-        _run_tmux(
++        _run_outer_tmux(
+             [
+                 "list-panes",
+                 "-t",
+@@ -863,12 +861,12 @@
+
+     # Split from the dashboard pane to keep it on the left.
+     attach_cmd = shlex.join(["tmux", "-L", INNER_SOCKET, "attach", "-t", INNER_SESSION])
+-    split = _run_tmux(
++    split = _run_outer_tmux(
+         [
+             "split-window",
+             "-h",
+-            "-p",
+-            str(int(width_percent)),
++            "-l",
++            f"{int(width_percent)}%",
+             "-t",
+             f"{OUTER_SESSION}:{OUTER_WINDOW}.0",
+             "-d",
